@@ -76,16 +76,15 @@
             con_bundle.forEach(function(con) {
               if (con.verificationStatus == 'confirmed'
                 || con.verificationStatus == 'differential'
-                || con.verificationStatus == 'refuted') {
-                let con_obj = {};
+                || con.verificationStatus == 'refuted'
+              ) {
+                let con_obj = defaultCondition();
                 con_obj.category = con.category.text;
                 if (con.code.coding) {
-                  con_obj.system = con.code.coding.system;
-                  con_obj.code = con.code.coding.code;
-                  con_obj.display = con.code.coding.display;
-                } else {
-                  con_obj.display = con.code.text;
+                  con_obj.system = con.code.coding[0].system;
+                  con_obj.code = con.code.coding[0].code;
                 }
+                con_obj.display = con.code.text;
 
                 if (con.clinicalStatus) {
                   con_obj.clinicalStatus = con.clinicalStatus;
@@ -117,6 +116,16 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
+    };
+  }
+
+  function defaultCondition(){
+    return {
+      category: {value: ''},
+      display: {value: ''},
+      system: {value: ''},
+      code: {value: ''},
+      clinicalStatus: {value: ''},
     };
   }
 
