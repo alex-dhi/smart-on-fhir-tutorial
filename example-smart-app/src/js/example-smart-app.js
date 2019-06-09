@@ -12,7 +12,7 @@
         var patient = smart.patient;
         var pt = patient.read();
         var obv = smart.patient.api.fetchAll({
-                    type: 'Condition',
+                    type: 'Observation',
                     query: {
                       /*code: {
                         $or: ['http://loinc.org|8302-2', 'http://loinc.org|8462-4',
@@ -22,9 +22,14 @@
                     }
                   });
 
-        $.when(pt, obv).fail(onError);
+        var con_promise = smart.patient.api.fetchAll({
+                    type: 'Condition',
+                    query: {}
+                  });
 
-        $.when(pt, obv).done(function(patient, obv) {
+                  $.when(pt, obv).fail(onError);
+
+        $.when(pt, obv, con_promise).done(function(patient, obv, con_bundle) {
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
 
@@ -42,7 +47,9 @@
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
 
+          var info = {};
           var p = defaultPatient();
+          info['p'] = p;
           p.birthdate = patient.birthDate;
           p.gender = gender;
           p.fname = fname;
@@ -60,7 +67,34 @@
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
 
-          ret.resolve(p);
+          // extract conditions
+          let con_array = [];
+          info['conditions'] = con_array;
+
+          con_bundle.entry.forEach(function(con) {
+            let resource = con.resource;
+            if (resource && (
+              resource.verificationStatus == 'confirmed'
+              || resource.verificationStatus == 'differential'
+              || resource.verificationStatus == 'refuted'
+              )) {
+              let con_obj = {};
+              con_obj.category = resource.category.text;
+              if (resource.code.coding) {
+                con_obj.system = resource.code.coding.system;
+                con_obj.code = resource.code.coding.code;
+                con_obj.display = resource.code.coding.display;
+              } else {
+                con_obj.display = resource.code.text;
+              }
+
+              if (resource.clinicalStatus) {
+                con_obj.clinicalStatus = resource.clinicalStatus;
+              }
+              con_array.push(con_obj);
+            }
+          });
+          ret.resolve(info);
         });
       } else {
         onError();
@@ -114,18 +148,28 @@
     }
   }
 
-  window.drawVisualization = function(p) {
+  window.drawVisualization = function(info) {
     $('#holder').show();
     $('#loading').hide();
-    $('#fname').html(p.fname);
-    $('#lname').html(p.lname);
-    $('#gender').html(p.gender);
-    $('#birthdate').html(p.birthdate);
-    $('#height').html(p.height);
-    $('#systolicbp').html(p.systolicbp);
-    $('#diastolicbp').html(p.diastolicbp);
-    $('#ldl').html(p.ldl);
-    $('#hdl').html(p.hdl);
+    $('#fname').html(info.p.fname);
+    $('#lname').html(info.p.lname);
+    $('#gender').html(info.p.gender);
+    $('#birthdate').html(info.p.birthdate);
+    $('#height').html(info.p.height);
+    $('#systolicbp').html(info.p.systolicbp);
+    $('#diastolicbp').html(info.p.diastolicbp);
+    $('#ldl').html(info.p.ldl);
+    $('#hdl').html(info.p.hdl);
+
+    // build conditions table
+    let tbl_html = "<table><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr>";
+    for (let i=0; i < info.conditions.length; i++) {
+      let con = info.conditions[i];
+      tbl_html += "<tr><td>" + con.category + "</td><td>" + con.display + "</td><td>" 
+                  + con.system + "</td><td>" + con.code + "</td><td>" + con.clinicalStatus + "</td></tr>";
+    }
+    tbl_html += "</table>";
+    $('#div-conditions').html(tbl_html);
   };
 
 })(window);

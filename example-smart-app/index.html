@@ -66,6 +66,8 @@
         </tr>
       </table>
     </div>
+    <div id='div-conditions'></div>
+    <div id='div-medications'></div>
     <!-- Required JS files to enable this page to embed within an MPage -->
     <!--
       Temporarily disable cerner-smart-embeddable-lib
@@ -86,8 +88,8 @@
     <script>
       extractData().then(
         //Display Patient Demographics and Observations if extractData was success
-        function(p) {
-          drawVisualization(p);
+        function(info) {
+          drawVisualization(info);
         },
 
         //Display 'Failed to call FHIR Service' if extractData failed
