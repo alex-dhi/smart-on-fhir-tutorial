@@ -22,14 +22,10 @@
                     }
                   });
 
-        var con_promise = smart.patient.api.fetchAll({
-                    type: 'Condition',
-                    query: {}
-                  });
 
                   $.when(pt, obv).fail(onError);
 
-        $.when(pt, obv, con_promise).done(function(patient, obv, con_bundle) {
+        $.when(pt, obv).done(function(patient, obv) {
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
 
@@ -47,9 +43,7 @@
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
 
-          var info = {};
           var p = defaultPatient();
-          info['p'] = p;
           p.birthdate = patient.birthDate;
           p.gender = gender;
           p.fname = fname;
@@ -67,34 +61,44 @@
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
 
-          // extract conditions
-          let con_array = [];
-          info['conditions'] = con_array;
+          var info = {};
+          info['p'] = p;
 
-          con_bundle.entry.forEach(function(con) {
-            let resource = con.resource;
-            if (resource && (
-              resource.verificationStatus == 'confirmed'
-              || resource.verificationStatus == 'differential'
-              || resource.verificationStatus == 'refuted'
-              )) {
-              let con_obj = {};
-              con_obj.category = resource.category.text;
-              if (resource.code.coding) {
-                con_obj.system = resource.code.coding.system;
-                con_obj.code = resource.code.coding.code;
-                con_obj.display = resource.code.coding.display;
-              } else {
-                con_obj.display = resource.code.text;
-              }
-
-              if (resource.clinicalStatus) {
-                con_obj.clinicalStatus = resource.clinicalStatus;
-              }
-              con_array.push(con_obj);
-            }
+          var con_promise = smart.patient.api.fetchAll({
+            type: 'Condition',
+            query: {}
           });
-          ret.resolve(info);
+          
+          $.when(con_promise).done(function(con_bundle) {
+            // extract conditions
+            let con_array = [];
+            info['conditions'] = con_array;
+
+            con_bundle.entry.forEach(function(con) {
+              let resource = con.resource;
+              if (resource && (
+                resource.verificationStatus == 'confirmed'
+                || resource.verificationStatus == 'differential'
+                || resource.verificationStatus == 'refuted'
+                )) {
+                let con_obj = {};
+                con_obj.category = resource.category.text;
+                if (resource.code.coding) {
+                  con_obj.system = resource.code.coding.system;
+                  con_obj.code = resource.code.coding.code;
+                  con_obj.display = resource.code.coding.display;
+                } else {
+                  con_obj.display = resource.code.text;
+                }
+
+                if (resource.clinicalStatus) {
+                  con_obj.clinicalStatus = resource.clinicalStatus;
+                }
+                con_array.push(con_obj);
+              }
+            });
+            ret.resolve(info);
+          });
         });
       } else {
         onError();
