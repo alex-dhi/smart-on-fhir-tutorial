@@ -14,11 +14,11 @@
         var obv = smart.patient.api.fetchAll({
                     type: 'Observation',
                     query: {
-                      /*code: {
+                      code: {
                         $or: ['http://loinc.org|8302-2', 'http://loinc.org|8462-4',
                               'http://loinc.org|8480-6', 'http://loinc.org|2085-9',
                               'http://loinc.org|2089-1', 'http://loinc.org|55284-4']
-                      }*/
+                      }
                     }
                   });
 
@@ -105,6 +105,55 @@
 
   };
 
+  window.getConditions = function() {
+    var ret = $.Deferred();
+
+    function onError() {
+      console.log('Loading error', arguments);
+      ret.reject();
+    }
+
+    if (smart.hasOwnProperty('patient')) {
+
+      var con_promise = smart.patient.api.fetchAll({
+        type: 'Condition',
+        query: {}
+      });
+      
+      $.when(con_promise).fail(onError);
+
+      $.when(con_promise).done(function(con_bundle) {
+        // extract conditions
+        let con_array = [];
+
+        con_bundle.forEach(function(con) {
+          if (con.verificationStatus == 'confirmed'
+            || con.verificationStatus == 'differential'
+            || con.verificationStatus == 'refuted'
+          ) {
+            let con_obj = defaultCondition();
+            con_obj.category = con.category.text;
+            if (con.code.coding) {
+              con_obj.system = con.code.coding[0].system;
+              con_obj.code = con.code.coding[0].code;
+            }
+            con_obj.display = con.code.text;
+
+            if (con.clinicalStatus) {
+              con_obj.clinicalStatus = con.clinicalStatus;
+            }
+            con_array.push(con_obj);
+          }
+        });
+        ret.resolve(con_array);
+      });
+    } else {
+      onError();
+    }
+
+    return ret.promise();
+  };
+
   function defaultPatient(){
     return {
       fname: {value: ''},
@@ -157,24 +206,26 @@
     }
   }
 
-  window.drawVisualization = function(info) {
+  window.drawObservation = function(p) {
     $('#holder').show();
     $('#loading').hide();
-    $('#fname').html(info.p.fname);
-    $('#lname').html(info.p.lname);
-    $('#gender').html(info.p.gender);
-    $('#birthdate').html(info.p.birthdate);
-    $('#height').html(info.p.height);
-    $('#systolicbp').html(info.p.systolicbp);
-    $('#diastolicbp').html(info.p.diastolicbp);
-    $('#ldl').html(info.p.ldl);
-    $('#hdl').html(info.p.hdl);
+    $('#fname').html(p.fname);
+    $('#lname').html(p.lname);
+    $('#gender').html(p.gender);
+    $('#birthdate').html(p.birthdate);
+    $('#height').html(p.height);
+    $('#systolicbp').html(p.systolicbp);
+    $('#diastolicbp').html(p.diastolicbp);
+    $('#ldl').html(p.ldl);
+    $('#hdl').html(p.hdl);
+  };
 
+  window.drawCondition = function(conditions) {
     // build conditions table
     let tbl_html = '<table id="table-conditions" class="table table-striped table-bordered table-sm" cellspacing="0" width="90%">'
           + '<thead><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr></thead><tbody>';
-    for (let i=0; i < info.conditions.length; i++) {
-      let con = info.conditions[i];
+    for (let i=0; i < conditions.length; i++) {
+      let con = conditions[i];
       tbl_html += "<tr><td>" + con.category + "</td><td>" + con.display + "</td><td>" 
                   + con.system + "</td><td>" + con.code + "</td><td>" + con.clinicalStatus + "</td></tr>";
     }

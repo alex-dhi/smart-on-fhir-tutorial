@@ -110,18 +110,26 @@
     <!-- MDBootstrap Datatables  -->
     <script type="text/javascript" src="src/js/addons/datatables.min.js"></script>
     <script>
+      //Display 'Failed to call FHIR Service' if data extract failed
+      function showError() {
+        $('#loading').hide();
+        $('#errors').html('<p> Failed to call FHIR Service </p>');
+      }
+
       extractData().then(
         //Display Patient Demographics and Observations if extractData was success
-        function(info) {
-          drawVisualization(info);
-        },
-
-        //Display 'Failed to call FHIR Service' if extractData failed
-        function() {
-          $('#loading').hide();
-          $('#errors').html('<p> Failed to call FHIR Service </p>');
-        }
+        function(p) {
+          drawObservation(p);
+          return getConditions();
+        }, 
+        showError
+      ).then(
+        function(conditions) {
+          drawCondition(conditions);
+        }, 
+        showError
       );
+
     </script>
   </body>
 </html>
