@@ -171,14 +171,19 @@
     $('#hdl').html(info.p.hdl);
 
     // build conditions table
-    let tbl_html = "<table><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr>";
+    let tbl_html = '<table id="table-conditions" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">'
+          + '<thead><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr></thead><tbody>';
     for (let i=0; i < info.conditions.length; i++) {
       let con = info.conditions[i];
       tbl_html += "<tr><td>" + con.category + "</td><td>" + con.display + "</td><td>" 
                   + con.system + "</td><td>" + con.code + "</td><td>" + con.clinicalStatus + "</td></tr>";
     }
-    tbl_html += "</table>";
+    tbl_html += "</tbody></table>";
     $('#div-conditions').html(tbl_html);
+
+    $('#table-conditions').DataTable();
+    $('.dataTables_length').addClass('bs-select');
+
   };
 
 })(window);

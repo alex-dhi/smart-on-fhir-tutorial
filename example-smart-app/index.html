@@ -10,6 +10,16 @@
       Temporarily disable cerner-smart-embeddable-lib
       <link rel='stylesheet' type='text/css' href='./lib/css/cerner-smart-embeddable-lib-1.0.0.min.css'>
     -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Bootstrap core CSS -->
+    <link href="src/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="src/css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="src/css/style.css" rel="stylesheet">
+    <!-- MDBootstrap Datatables  -->
+    <link href="src/css/addons/datatables.min.css" rel="stylesheet">
   </head>
   <body>
     <div id='errors'>
@@ -84,7 +94,16 @@
     <!-- Prevent session bleed caused by single threaded embedded browser and sessionStorage API -->
     <!-- https://github.com/cerner/fhir-client-cerner-additions -->
     <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- JQuery -->
+    <script type="text/javascript" src="src/js/jquery-3.4.1.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="src/js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="src/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="src/js/mdb.min.js"></script>
+    <!-- MDBootstrap Datatables  -->
+    <script type="text/javascript" src="src/js/addons/datatables.min.js"></script>
     <script>
       extractData().then(
         //Display Patient Demographics and Observations if extractData was success
