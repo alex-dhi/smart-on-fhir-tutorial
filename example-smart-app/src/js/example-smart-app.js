@@ -183,7 +183,18 @@
 
     $('#table-conditions').DataTable();
     $('.dataTables_length').addClass('bs-select');
-
+    $('#btn-con').show();
   };
+
+  window.toggleTables = function(tbl_to_show) {
+    let tables = ['observations','conditions','medications'];
+    for (let i=0; i < tables.length; i++) {
+      if (tables[i] == tbl_to_show) {
+        $('#table-' + tables[i]).show();
+      } else {
+        $('#table-' + tables[i]).hide();
+      }
+    }
+  }
 
 })(window);

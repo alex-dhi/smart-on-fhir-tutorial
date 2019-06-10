@@ -11,6 +11,18 @@ body {
   display: none;
 }
 
+#btn-obv {
+  display: none;
+}
+
+#btn-con {
+  display: none;
+}
+
+#btn-med {
+  display: none;
+}
+
 .spinner {
   margin: 100px auto 0;
   width: 70px;
