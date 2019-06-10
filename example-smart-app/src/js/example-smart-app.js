@@ -22,6 +22,8 @@
                     }
                   });
 
+        $.when(pt, obv).fail(onError);
+
         $.when(pt, obv).done(function(patient, obv) {
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
@@ -58,42 +60,7 @@
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
 
-          var info = {};
-          info['p'] = p;
-
-          var con_promise = smart.patient.api.fetchAll({
-            type: 'Condition',
-            query: {}
-          });
-          
-          $.when(pt, obv, con_promise).fail(onError);
-
-          $.when(con_promise).done(function(con_bundle) {
-            // extract conditions
-            let con_array = [];
-            info['conditions'] = con_array;
-
-            con_bundle.forEach(function(con) {
-              if (con.verificationStatus == 'confirmed'
-                || con.verificationStatus == 'differential'
-                || con.verificationStatus == 'refuted'
-              ) {
-                let con_obj = defaultCondition();
-                con_obj.category = con.category.text;
-                if (con.code.coding) {
-                  con_obj.system = con.code.coding[0].system;
-                  con_obj.code = con.code.coding[0].code;
-                }
-                con_obj.display = con.code.text;
-
-                if (con.clinicalStatus) {
-                  con_obj.clinicalStatus = con.clinicalStatus;
-                }
-                con_array.push(con_obj);
-              }
-            });
-            ret.resolve(info);
-          });
+          ret.resolve(p);
         });
       } else {
         onError();
@@ -113,44 +80,47 @@
       ret.reject();
     }
 
-    if (smart.hasOwnProperty('patient')) {
+    function onReady(smart)  {
+      if (smart.hasOwnProperty('patient')) {
 
-      var con_promise = smart.patient.api.fetchAll({
-        type: 'Condition',
-        query: {}
-      });
-      
-      $.when(con_promise).fail(onError);
-
-      $.when(con_promise).done(function(con_bundle) {
-        // extract conditions
-        let con_array = [];
-
-        con_bundle.forEach(function(con) {
-          if (con.verificationStatus == 'confirmed'
-            || con.verificationStatus == 'differential'
-            || con.verificationStatus == 'refuted'
-          ) {
-            let con_obj = defaultCondition();
-            con_obj.category = con.category.text;
-            if (con.code.coding) {
-              con_obj.system = con.code.coding[0].system;
-              con_obj.code = con.code.coding[0].code;
-            }
-            con_obj.display = con.code.text;
-
-            if (con.clinicalStatus) {
-              con_obj.clinicalStatus = con.clinicalStatus;
-            }
-            con_array.push(con_obj);
-          }
+        var con_promise = smart.patient.api.fetchAll({
+          type: 'Condition',
+          query: {}
         });
-        ret.resolve(con_array);
-      });
-    } else {
-      onError();
+        
+        $.when(con_promise).fail(onError);
+
+        $.when(con_promise).done(function(con_bundle) {
+          // extract conditions
+          let con_array = [];
+
+          con_bundle.forEach(function(con) {
+            if (con.verificationStatus == 'confirmed'
+              || con.verificationStatus == 'differential'
+              || con.verificationStatus == 'refuted'
+            ) {
+              let con_obj = defaultCondition();
+              con_obj.category = con.category.text;
+              if (con.code.coding) {
+                con_obj.system = con.code.coding[0].system;
+                con_obj.code = con.code.coding[0].code;
+              }
+              con_obj.display = con.code.text;
+
+              if (con.clinicalStatus) {
+                con_obj.clinicalStatus = con.clinicalStatus;
+              }
+              con_array.push(con_obj);
+            }
+          });
+          ret.resolve(con_array);
+        });
+      } else {
+        onError();
+      }
     }
 
+    FHIR.oauth2.ready(onReady, onError);
     return ret.promise();
   };
 
