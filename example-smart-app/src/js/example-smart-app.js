@@ -307,8 +307,8 @@
                   + med.status + "</td><td>" + med.system + "</td><td>" + med.code + "</td></tr>";
     }
     tbl_html += "</tbody></table>";
+    $('#div-medications').hide();
     $('#div-medications').html(tbl_html);
-    $('#table-medications').hide();
 
     $('#table-medications').DataTable();
     $('.dataTables_length').addClass('bs-select');
@@ -319,9 +319,9 @@
     let tables = ['observations','conditions','medications'];
     for (let i=0; i < tables.length; i++) {
       if (tables[i] == tbl_to_show) {
-        $('#table-' + tables[i]).show();
+        $('#div-' + tables[i]).show();
       } else {
-        $('#table-' + tables[i]).hide();
+        $('#div-' + tables[i]).hide();
       }
     }
   }
