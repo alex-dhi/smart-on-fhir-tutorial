@@ -154,7 +154,7 @@
             if (med.dateWritten) {
               med_obj.dateWritten = med.dateWritten.substring(0,10);
             }
-            if (med.dosageInstruction.length > 0) {
+            if (med.dosageInstruction.length > 0 && med.dosageInstruction[0].doseQuantity) {
               med_obj.doseQuantity = med.dosageInstruction[0].doseQuantity;
             }
             if (med.medicationCodeableConcept) {
