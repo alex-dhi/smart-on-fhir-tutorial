@@ -171,7 +171,7 @@
     $('#hdl').html(info.p.hdl);
 
     // build conditions table
-    let tbl_html = '<table id="table-conditions" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">'
+    let tbl_html = '<table id="table-conditions" class="table table-striped table-bordered table-sm" cellspacing="0" width="90%">'
           + '<thead><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr></thead><tbody>';
     for (let i=0; i < info.conditions.length; i++) {
       let con = info.conditions[i];
