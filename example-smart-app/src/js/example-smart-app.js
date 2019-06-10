@@ -124,6 +124,59 @@
     return ret.promise();
   };
 
+  window.getMedOrders = function() {
+    var ret = $.Deferred();
+
+    function onError() {
+      console.log('Loading error', arguments);
+      ret.reject();
+    }
+
+    function onReady(smart)  {
+      if (smart.hasOwnProperty('patient')) {
+
+        var med_promise = smart.patient.api.fetchAll({
+          type: 'MedicationOrder',
+          query: {}
+        });
+        
+        $.when(med_promise).fail(onError);
+
+        $.when(med_promise).done(function(med_bundle) {
+          // extract conditions
+          let med_array = [];
+
+          med_bundle.forEach(function(med) {
+            /*
+            if (med.verificationStatus == 'confirmed'
+              || med.verificationStatus == 'differential'
+              || med.verificationStatus == 'refuted'
+            ) {
+              let med_obj = defaultMedication();
+              med_obj.category = med.category.text;
+              if (med.code.coding) {
+                med_obj.system = med.code.coding[0].system;
+                med_obj.code = med.code.coding[0].code;
+              }
+              med_obj.display = med.code.text;
+
+              if (med.clinicalStatus) {
+                med_obj.clinicalStatus = med.clinicalStatus;
+              }
+              med_array.push(med_obj);
+            }*/
+          });
+          ret.resolve(med_array);
+        });
+      } else {
+        onError();
+      }
+    }
+
+    FHIR.oauth2.ready(onReady, onError);
+    return ret.promise();
+  };
+
   function defaultPatient(){
     return {
       fname: {value: ''},

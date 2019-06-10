@@ -126,6 +126,7 @@
       ).then(
         function(conditions) {
           drawCondition(conditions);
+          return getMedOrders();
         }, 
         showError
       );
