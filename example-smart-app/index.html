@@ -129,6 +129,11 @@
           return getMedOrders();
         }, 
         showError
+      ).then(
+        function(meds) {
+          drawMedication(meds);
+        }, 
+        showError
       );
 
     </script>

@@ -147,24 +147,50 @@
           let med_array = [];
 
           med_bundle.forEach(function(med) {
-            /*
-            if (med.verificationStatus == 'confirmed'
-              || med.verificationStatus == 'differential'
-              || med.verificationStatus == 'refuted'
-            ) {
-              let med_obj = defaultMedication();
-              med_obj.category = med.category.text;
-              if (med.code.coding) {
-                med_obj.system = med.code.coding[0].system;
-                med_obj.code = med.code.coding[0].code;
+            let med_obj = defaultMedication();
+            if (med.status) {
+              med_obj.status = med.status;
+            }
+            if (med.dateWritten) {
+              med_obj.dateWritten = med.dateWritten.substring(0,10);
+            }
+            if (med.dosageInstruction.length > 0) {
+              med_obj.doseQuantity = med.dosageInstruction.doseQuantity;
+            }
+            if (med.medicationCodeableConcept) {
+              if (med.medicationCodeableConcept.coding) {
+                med_obj.system = med.medicationCodeableConcept.coding[0].system;
+                med_obj.code = med.medicationCodeableConcept.coding[0].code;
               }
-              med_obj.display = med.code.text;
-
-              if (med.clinicalStatus) {
-                med_obj.clinicalStatus = med.clinicalStatus;
-              }
+              med_obj.display = med.medicationCodeableConcept.text;
               med_array.push(med_obj);
-            }*/
+            } else if (med.contained) { // combo meds
+              // assuming top-level meds is first element
+              let code = med.contained[0].code;
+              if (code.coding) {
+                med_obj.system = code.coding[0].system;
+                med_obj.code = code.coding[0].code;
+              }
+              med_obj.display = code.text;
+              med_array.push(med_obj);
+
+              // go thru ingredients if present
+              for(let j=1; j < med.contained.length; j++) {
+                let ingredient_obj = defaultMedication();
+                // reset dose quantity, which is only associated with top-level meds
+                ingredient_obj.status = med_obj.status;
+                ingredient_obj.dateWritten = med_obj.dateWritten;
+
+                let code = med.contained[j].code;
+                if (code.coding) {
+                  ingredient_obj.system = code.coding[0].system;
+                  ingredient_obj.code = code.coding[0].code;
+                }
+                ingredient_obj.display = code.text;
+                med_array.push(ingredient_obj);
+              }
+            }
+
           });
           ret.resolve(med_array);
         });
@@ -198,6 +224,17 @@
       system: '',
       code: '',
       clinicalStatus: ''
+    };
+  }
+
+  function defaultMedication(){
+    return {
+      doseQuantity: {value: '', unit: ''},
+      display: '',
+      system: '',
+      code: '',
+      status: '',
+      dateWritten: ''
     };
   }
 
@@ -258,6 +295,24 @@
     $('#table-conditions').DataTable();
     $('.dataTables_length').addClass('bs-select');
     $('#btn-con').show();
+  };
+
+  window.drawMedication = function(meds) {
+    // build meds table
+    let tbl_html = '<table id="table-medications" class="table table-striped table-bordered table-sm" cellspacing="0" width="90%">'
+          + '<thead><tr><th>Medication</th><th>Dose Quantity</th><th>Status</th><th>Codeset</th><th>Code</th></tr></thead><tbody>';
+    for (let i=0; i < meds.length; i++) {
+      let med = meds[i];
+      tbl_html += "<tr><td>" + med.display + "</td><td>" + med.doseQuantity.value + ' ' + med.doseQuantity.unit + "</td><td>" 
+                  + med.status + "</td><td>" + med.system + "</td><td>" + med.code + "</td></tr>";
+    }
+    tbl_html += "</tbody></table>";
+    $('#div-medications').html(tbl_html);
+    $('#table-medications').hide();
+
+    $('#table-medications').DataTable();
+    $('.dataTables_length').addClass('bs-select');
+    $('#btn-med').show();
   };
 
   window.toggleTables = function(tbl_to_show) {
