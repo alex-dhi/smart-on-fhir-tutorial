@@ -121,11 +121,11 @@
 
   function defaultCondition(){
     return {
-      category: {value: ''},
-      display: {value: ''},
-      system: {value: ''},
-      code: {value: ''},
-      clinicalStatus: {value: ''},
+      category: '',
+      display: '',
+      system: '',
+      code: '',
+      clinicalStatus: ''
     };
   }
 
