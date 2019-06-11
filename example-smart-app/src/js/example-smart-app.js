@@ -110,6 +110,12 @@
               if (con.clinicalStatus) {
                 con_obj.clinicalStatus = con.clinicalStatus;
               }
+              if (con.dateRecorded) {
+                con_obj.dateRecorded = con.dateRecorded;
+              }
+              if (con.abatementDateTime) {
+                con_obj.abatementDateTime = con.abatementDateTime;
+              }
               con_array.push(con_obj);
             }
           });
@@ -223,7 +229,9 @@
       display: '',
       system: '',
       code: '',
-      clinicalStatus: ''
+      clinicalStatus: '',
+      dateRecorded: '',
+      abatementDateTime: ''
     };
   }
 
@@ -283,11 +291,11 @@
   window.drawCondition = function(conditions) {
     // build conditions table
     let tbl_html = '<table id="table-conditions" class="table table-striped table-bordered table-sm" cellspacing="0" width="90%">'
-          + '<thead><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th></tr></thead><tbody>';
+          + '<thead><tr><th>Category</th><th>Condition</th><th>Codeset</th><th>Code</th><th>Clinical Status</th><th>Date Recorded</th></tr></thead><tbody>';
     for (let i=0; i < conditions.length; i++) {
       let con = conditions[i];
       tbl_html += "<tr><td>" + con.category + "</td><td>" + con.display + "</td><td>" 
-                  + con.system + "</td><td>" + con.code + "</td><td>" + con.clinicalStatus + "</td></tr>";
+                  + con.system + "</td><td>" + con.code + "</td><td>" + con.clinicalStatus + "</td><td>" + con.dateRecorded + "</td></tr>";
     }
     tbl_html += "</tbody></table>";
     $('#div-conditions').html(tbl_html);
@@ -300,11 +308,11 @@
   window.drawMedication = function(meds) {
     // build meds table
     let tbl_html = '<table id="table-medications" class="table table-striped table-bordered table-sm" cellspacing="0" width="90%">'
-          + '<thead><tr><th>Medication</th><th>Dose Quantity</th><th>Status</th><th>Codeset</th><th>Code</th></tr></thead><tbody>';
+          + '<thead><tr><th>Medication</th><th>Dose Quantity</th><th>Status</th><th>Codeset</th><th>Code</th><th>Date</th></tr></thead><tbody>';
     for (let i=0; i < meds.length; i++) {
       let med = meds[i];
       tbl_html += "<tr><td>" + med.display + "</td><td>" + med.doseQuantity.value + ' ' + med.doseQuantity.unit + "</td><td>" 
-                  + med.status + "</td><td>" + med.system + "</td><td>" + med.code + "</td></tr>";
+                  + med.status + "</td><td>" + med.system + "</td><td>" + med.code + "</td><td>" + med.dateWritten + "</td></tr>";
     }
     tbl_html += "</tbody></table>";
     $('#div-medications').hide();
